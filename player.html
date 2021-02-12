@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>a simple music player</title>
+    <style>
+        body {
+            font-family: sans-serif，Verdana, Arial, Helvetica;
+            font-size: 10pt;
+        }
+
+        #playlist {
+            border-radius: 10px;
+            padding: 5px 5px 3px 5px;
+            width: 50%;
+            margin-left: 1px;
+            margin-top: 10px;
+            height: 300px;
+            overflow: auto;
+            /* align-items: center; */
+            margin-left: 420px;
+        }
+
+
+
+        #btn {
+            border-radius: 10px;
+            width: 296px;
+            margin-left: 1px;
+            margin-top: 5px;
+            height: 50px;
+            overflow: auto;
+            background: #EEB422;
+            font-weight: bold;
+            color: white;
+        }
+
+        #playlist a {
+            display: block;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 2px;
+        }
+
+        #playlist a.file {
+            background: #66CDAA;
+        }
+
+        #playlist {
+            background: #3CB371;
+        }
+
+        #playlist a {
+            background: #7CCD7C;
+        }
+
+        #playlist a.playing {
+            background: #9ACD32;
+            font-weight: bold;
+            color: red;
+        }
+
+        #playlist a:hover {
+            background: #EEC900;
+        }
+    </style>
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        var root = "/music/";
+        var path = [];
+
+        function init() {
+            load(path);
+            $('#player').bind('ended', next);
+            $('#btn').click(next);
+        }
+        function load(path) {
+            var url = root + path.join('/');
+            $.ajax({
+                url: url,
+                dataType: "json",
+                success: function (data) {
+                    listFile(data)
+                }
+            });
+        }
+        function listFile(files) {
+            var $b = $('#playlist').empty();
+            function addToList(i, f) {
+                if (f.Name[0] == '.' || f.Name[0] == ':') return;
+                var dir = f.IsDir;
+                if (dir) return;
+                f.Path = path.join('/');
+                $('<a></a>').text(f.Name).data('file', f)
+                    .addClass("file")
+                    .appendTo($b)
+                    .click(clickFile);
+            }
+            $.each(files, addToList);
+        }
+
+        function clickFile(e) {
+            var f = $(e.target).data('file');
+            var name = f.Name;
+            var path = f.Path;
+            var url = root + path + '/' + name;
+            $('#playlist a').removeClass('playing');
+            $(e.target).addClass('playing')
+            $('#player').attr('src', url);
+            $('#player').play();
+        }
+        function next() {
+            var $next = $('#playlist a.playing').next();
+            if ($next.length) $next.click();
+        }
+
+        google.load("jquery", "1.3.1");
+        google.setOnLoadCallback(init);
+    </script>
+</head>
+
+<body>
+    <audio id="player" controls autoplay autobuffer>
+        <p>What? Your browser doesn't support</p>
+    </audio>
+    <div id="playlist"></div>
+    <BUTTON id="btn" title="skip this song!">SKIP</BUTTON>
+</body>
+
+</html>
